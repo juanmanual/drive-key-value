@@ -13,6 +13,11 @@ export default class StoreController {
         return this.storeService.getValueByKey(key);
     }
 
+    @Get('/')
+    getAllKeys() {
+        return this.storeService.getAllKeys();
+    }
+
     @Put(':key')
     async replaceValue(@Param('key') key: string, @Req() req) {
         if(req.readable) {

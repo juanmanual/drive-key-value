@@ -35,4 +35,11 @@ export default class StoreService {
         statement.run(key, value);
     }
 
+    getAllKeys() {
+        const statement = this.db.instance.prepare(
+            'SELECT DISTINCT key FROM main'
+        );
+        return statement.all().map(({key}) => key);
+    }
+
 }
