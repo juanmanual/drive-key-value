@@ -1,17 +1,14 @@
 import { HttpStatus, HttpException, Injectable } from '@nestjs/common';
 
-
-const Database = require('better-sqlite3');
-const createTable = "CREATE TABLE IF NOT EXISTS " +
-                    "main('key' varchar PRIMARY KEY, 'value' varchar);"
-const db = new Database('test.db');
-db.exec(createTable);
+import DatabaseService from './database.service';
 
 @Injectable()
 export default class StoreService {
 
+    constructor(private readonly db: DatabaseService) {}
+
     getValueByKey(key: string) {
-        const statement = db.prepare(
+        const statement = this.db.instance.prepare(
             'SELECT value FROM main WHERE key = ?');
         const result = statement.get(key);
         if(result) return result.value;
@@ -19,7 +16,7 @@ export default class StoreService {
     }
 
     deleteValue(key: string) {
-        const statement = db.prepare(
+        const statement = this.db.instance.prepare(
             'DELETE FROM main WHERE key = ? LIMIT 1');
 
         const result = statement.run(key);
@@ -29,7 +26,7 @@ export default class StoreService {
     }
 
     replaceValue(key: string, value: string) {
-        const statement = db.prepare(
+        const statement = this.db.instance.prepare(
             'INSERT INTO main(key,value) ' +
             'Values(?, ?) ' +
             'ON CONFLICT(key) DO UPDATE SET ' +
