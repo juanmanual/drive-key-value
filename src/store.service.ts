@@ -1,4 +1,5 @@
 import { HttpStatus, HttpException, Injectable } from '@nestjs/common';
+import KeyValueDto from './dto/key-value-dt';
 
 import DatabaseService from './database.service';
 
@@ -6,6 +7,14 @@ import DatabaseService from './database.service';
 export default class StoreService {
 
     constructor(private readonly db: DatabaseService) {}
+
+    bulkLoad(keyValuePairs: KeyValueDto[]) {
+        const insert = this.db.instance.prepare('INSERT INTO main (key, value) VALUES (@key, @value);');
+        const insertMany = this.db.instance.transaction((keyValuePairs: KeyValueDto[]) => {
+            for(const keyValuePair of keyValuePairs) insert.run(keyValuePair);
+        })
+        insertMany(keyValuePairs);
+    }
 
     getValueByKey(key: string) {
         const statement = this.db.instance.prepare(

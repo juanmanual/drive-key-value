@@ -4,8 +4,8 @@ import { Request } from 'express';
 
 
 jest.mock('raw-body', () => {
-    return jest.fn().mockReturnValue('test1');
-})
+    return jest.fn().mockReturnValue('[{"key": "foo", "value": "bar"}]');
+});
 
 const mockDatabaseService = {
     instance: {}
@@ -15,6 +15,7 @@ const mockGetValueByKey = jest.fn();
 const mockDeleteValue = jest.fn();
 const mockReplaceValue = jest.fn();
 const mockGetAllKeys = jest.fn();
+const mockBulkLoad = jest.fn();
 
 const mockStoreService = new (class extends StoreService {
     constructor() {
@@ -24,6 +25,7 @@ const mockStoreService = new (class extends StoreService {
     deleteValue = mockDeleteValue;
     replaceValue = mockReplaceValue;
     getAllKeys = mockGetAllKeys;
+    bulkLoad = mockBulkLoad;
 })();
 
 const storeController = new StoreController(mockStoreService);
@@ -54,6 +56,13 @@ describe('Store controller', () => {
             readable: true,
         } as Request;
         expect(await storeController.replaceValue('foo', mockRequest)).toBeUndefined();
-        expect(mockReplaceValue).toHaveBeenCalledWith('foo', 'test1')
-    })
+        expect(mockReplaceValue).toHaveBeenCalledWith('foo', '[{"key": "foo", "value": "bar"}]');
+    });
+    it('can perform a bulk load', async () => {
+        const mockRequest = {
+            readable: true,
+        } as Request;
+        expect(await storeController.bulkLoad(mockRequest)).toBeUndefined();
+        expect(mockBulkLoad).toBeCalledWith([{key: 'foo', value: 'bar'}]);
+    });
 })

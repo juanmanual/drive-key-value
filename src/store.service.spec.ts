@@ -7,9 +7,12 @@ const mockStatement = {
     all: jest.fn(),
 }
 
+const mockTransactionLambda = jest.fn();
+
 const mockDatabaseService = {
     instance: {
         prepare: jest.fn().mockReturnValue(mockStatement),
+        transaction: jest.fn().mockReturnValue(mockTransactionLambda),
     },
 }
 const storeService = new StoreService(mockDatabaseService);
@@ -60,6 +63,16 @@ describe('store service', () => {
             { key: 'baz'}
         ]);
         expect(storeService.getAllKeys()).toStrictEqual(['foo', 'bar', 'baz']);
+    });
+
+    it('can preform a bulk load', () => {
+        const bulkData = [
+            {key: 'foo1', value: 'bar1'},
+            {key: 'foo2', value: 'bar2'}
+        ]
+        storeService.bulkLoad(bulkData);
+        expect(mockDatabaseService.instance.transaction).toBeCalledWith(expect.any(Function));
+        expect(mockTransactionLambda).toBeCalledWith(bulkData);
     })
 
 });
