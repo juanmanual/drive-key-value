@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Put, Req } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Put, Req } from '@nestjs/common';
 import StoreService from './store.service';
 import * as rawBody from 'raw-body';
+import { Request } from 'express';
 
 @Controller('store')
 export default class StoreController {
@@ -19,7 +20,7 @@ export default class StoreController {
     }
 
     @Put(':key')
-    async replaceValue(@Param('key') key: string, @Req() req) {
+    async replaceValue(@Param('key') key: string, @Req() req: Request) {
         if(req.readable) {
             return this.storeService.replaceValue(key, (await rawBody(req)).toString());
         }
